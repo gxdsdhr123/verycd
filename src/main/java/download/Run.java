@@ -10,17 +10,16 @@ public class Run {
 
         if(args.length>0) {
 
+            File file = new File("download.txt");
+            FileOutputStream fos = new FileOutputStream(file);
+
             for(String arg : args) {
-
                 arg = arg.replaceAll("verycd.com", "verycd.gdajie.com");
-                File file = new File("download.txt");
-
-                FileOutputStream fos = new FileOutputStream(file);
                 Link.dealLink(arg, fos);
-                fos.flush();
-                fos.close();
-            }
 
+            }
+            fos.flush();
+            fos.close();
         }
 
     }
