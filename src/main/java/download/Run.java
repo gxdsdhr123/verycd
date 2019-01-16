@@ -13,7 +13,8 @@ public class Run {
             File file = new File("download.txt");
             FileOutputStream fos = new FileOutputStream(file);
 
-            for(String arg : args) {
+            String[] param = args[0].split(",");
+            for(String arg : param) {
                 arg = arg.replaceAll("verycd.com", "verycd.gdajie.com");
                 Link.dealLink(arg, fos);
 
