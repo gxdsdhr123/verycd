@@ -1,7 +1,5 @@
 package download;
 
-import download.FileLoad;
-import download.HTTPClient;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Element;
@@ -16,13 +14,17 @@ public class Link {
 
     public static void dealLink(String url, FileOutputStream fos) {
 
+        System.out.println("analysis one url start");
+        System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+        System.out.println(url);
+        System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+        System.out.println("analysis one url end");
+
         String result = HTTPClient.postJson(url, "{}");
 
-        System.out.println("result start");
-        System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
-        System.out.println(result);
-        System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-        System.out.println("result end");
+        if(!result.isEmpty()) {
+            System.out.println("analysis one url successful");
+        }
 
         try{
 
@@ -37,13 +39,6 @@ public class Link {
                 Document document = reader.read(is);
 
                 Element rootElement = document.getRootElement();
-
-                System.out.println("element start");
-                System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
-                System.out.println(rootElement.toString());
-                System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-                System.out.println("element end");
-
                 List<Element> list = rootElement.selectNodes("//tbody//tr//font//a");
 
                 System.out.println("link start");

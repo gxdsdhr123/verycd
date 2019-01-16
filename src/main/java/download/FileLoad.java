@@ -11,13 +11,17 @@ public class FileLoad {
 
     public static void fileload(FileOutputStream fos, String url) {
 
+        System.out.println("analysis two url start");
+        System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+        System.out.println(url);
+        System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+        System.out.println("analysis two url end");
+
         String result = HTTPClient.postJson(url, "{}");
 
-        System.out.println("resource start");
-        System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
-        System.out.println(result);
-        System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-        System.out.println("resource end");
+        if(!result.isEmpty()) {
+            System.out.println("analysis two url successful");
+        }
 
         try{
 
@@ -38,14 +42,17 @@ public class FileLoad {
 
                     Element rootElement = document.getRootElement();
 
-                    System.out.println("file start");
+                    System.out.println("write file start");
                     System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
-                    System.out.println(rootElement.toString());
-                    System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-                    System.out.println("file end");
 
                     String edit = rootElement.attributeValue("href") + "\r\n";
+
+                    System.out.println(edit);
+
                     fos.write(edit.getBytes());
+
+                    System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+                    System.out.println("write file end");
                 }
 
             }

@@ -13,6 +13,7 @@ import org.apache.http.util.EntityUtils;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.util.concurrent.*;
 
 public class HTTPClient {
 
@@ -24,36 +25,63 @@ public class HTTPClient {
      */
     public static String postJson(String url,String jsonString)
     {
-        String result = null;
-        CloseableHttpClient httpClient = HttpClients.createDefault();
-        HttpPost post = new HttpPost(url);
-        CloseableHttpResponse response = null;
-        try {
-            post.setEntity(new ByteArrayEntity(jsonString.getBytes("UTF-8")));
-            response = httpClient.execute(post);
-            if(response != null && response.getStatusLine().getStatusCode() == 200)
-            {
-                HttpEntity entity = response.getEntity();
-                result = entityToString(entity);
-            }
-            return result;
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        } catch (ClientProtocolException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }finally {
-            try {
-                httpClient.close();
-                if(response != null)
-                {
-                    response.close();
+        final ExecutorService exec = Executors.newFixedThreadPool(1);
+
+        Callable<String> call = new Callable<String>() {
+            public String call() throws Exception {
+
+                String result = null;
+                CloseableHttpClient httpClient = HttpClients.createDefault();
+                HttpPost post = new HttpPost(url);
+                CloseableHttpResponse response = null;
+                try {
+                    post.setEntity(new ByteArrayEntity(jsonString.getBytes("UTF-8")));
+                    response = httpClient.execute(post);
+                    if(response != null && response.getStatusLine().getStatusCode() == 200)
+                    {
+                        HttpEntity entity = response.getEntity();
+                        result = entityToString(entity);
+                    }
+                    return result;
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                } catch (ClientProtocolException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }finally {
+                    try {
+                        httpClient.close();
+                        if(response != null)
+                        {
+                            response.close();
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
+
+                return null;
             }
+        };
+
+        try {
+            Future<String> future = exec.submit(call);
+            // set db connection timeout to 15 seconds
+            String obj = future.get(1000 * 15, TimeUnit.MILLISECONDS);
+            return obj;
+        } catch (TimeoutException ex) {
+
+            System.err.println("任务超时, 正在重试...");
+            return postJson(url, jsonString);
+        } catch (Exception e) {
+
+            System.err.println("执行失败");
+        } finally {
+
+            exec.shutdown();
         }
+
         return null;
     }
 
