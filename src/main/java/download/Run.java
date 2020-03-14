@@ -8,16 +8,18 @@ public class Run {
 
     public static void main(String[] args) throws IOException {
 
+        args = new String[47];
+        for(int i=1; i<=47; i++) {
+            args[i-1] = "http://jrb.nmgcredit.com/yqzt_rzdtlist.html?page=" + i;
+        }
+
         if(args.length>0) {
 
             File file = new File("download.txt");
             FileOutputStream fos = new FileOutputStream(file);
 
-            String[] param = args[0].split(",");
-            for(String arg : param) {
-                arg = arg.replaceAll("verycd.com", "verycd.gdajie.com");
+            for(String arg : args) {
                 Link.dealLink(arg, fos);
-
             }
             fos.flush();
             fos.close();

@@ -6,6 +6,7 @@ import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 
 import java.io.*;
+import java.util.List;
 
 public class FileLoad {
 
@@ -17,39 +18,52 @@ public class FileLoad {
         System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>");
         System.out.println("analysis two url end");
 
-        String result = HTTPClient.postJson(url, "{}");
+        String result = HTTPClient.postJson("http://jrb.nmgcredit.com/" + url, "{}");
 
-        if(!result.isEmpty()) {
+        if (!result.isEmpty()) {
             System.out.println("analysis two url successful");
         }
 
-        try{
+        try {
 
-            String[] context = result.split("<div id=\"detail\" style=\"display: none;\"> ");
+            String[] context = result.split("<table class=\"xdcparticle_table\">");
 
-            if(context.length>0) {
+            if (context.length > 0) {
 
-                String[] contents = context[1].split("<center>");
+                String[] contents = context[1].split("</table>");
 
-                if(contents.length>0) {
+                if (contents.length > 0) {
 
-                    String[] content = contents[1].split("</center>");
-
-                    content[0] = content[0].replaceAll("<br>", "");
-                    InputStream is = Link.getStringStream(content[0]);
+                    String content = contents[0];
+                    content = content.replaceAll("&nbsp;", "");
+                    content = content.replaceAll("\r\n", "");
+                    InputStream is = Link.getStringStream("<table>" + content + "</table>");
                     SAXReader reader = new SAXReader();
                     Document document = reader.read(is);
 
-                    Element rootElement = document.getRootElement();
+                    List<Element> trList = document.getRootElement().elements();
 
                     System.out.println("write file start");
                     System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
 
-                    String edit = rootElement.attributeValue("href") + "\r\n";
+                    for (int j = 0; j < trList.size(); j++) {
+                        Element tr = trList.get(j);
+                        List<Element> tdList = tr.elements();
+                        for (int i = 0; i < tdList.size(); i++) {
+                            if ((i % 2 == 1) || (j == trList.size() - 1)) {
+                                Element td = tdList.get(i);
+                                String text = td.getTextTrim();
+                                text = text + ",";
+                                System.out.println(text);
+                                fos.write(text.getBytes());
+                            }
+                        }
+                    }
+                    fos.write("\r\n".getBytes());
+                    /*String edit = rootElement.attributeValue("href") + "\r\n";
+                    System.out.println(edit);*/
 
-                    System.out.println(edit);
-
-                    fos.write(edit.getBytes());
+                    //fos.write((edit).getBytes());
 
                     System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>");
                     System.out.println("write file end");
@@ -57,12 +71,10 @@ public class FileLoad {
 
             }
 
-        } catch (DocumentException e) {
+        } catch (Exception e) {
 
+            e.printStackTrace();
             System.err.println("解析异常");
-        } catch (IOException e) {
-
-            System.err.println("IO异常");
         }
     }
 }
